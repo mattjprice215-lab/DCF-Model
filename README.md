@@ -1,42 +1,52 @@
-# Portfolio Intelligence Dashboard
+# Portfolio Intelligence Dashboard (Vercel-ready)
 
-A Streamlit dashboard that analyzes portfolio concentration, growth expectations, scenario changes, and rule-based suggestions using technicals, fundamentals, and analyst sentiment.
+This repository is now a **Next.js 15** dashboard that is ready to deploy on Vercel.
 
-## Features
+It provides:
+- Holdings upload via CSV (`ticker`, `shares`, `cost_basis`, optional `target_weight`)
+- Concentration analytics (position + sector exposure)
+- Growth expectation estimates (blended growth + analyst upside)
+- Scenario simulation (target weights + optional cash deployment)
+- Rule-based action suggestions (technicals + fundamentals + analyst metrics)
+- Photo uploads for thesis screenshots/notes
 
-- **Holdings upload** (`ticker`, `shares`, `cost_basis`, optional `target_weight`)
-- **Concentration views** by position and sector
-- **Growth expectations** using blended assumptions from growth and analyst upside
-- **Fundamental + analyst panel** (PE, revenue growth, earnings growth, recommendation mean, analyst count)
-- **Technical score inputs** (1M momentum, price vs SMA50, SMA50 vs SMA200)
-- **Scenario simulator** for new target weights and optional cash deployment
-- **Action suggestions**: Add / Hold / Trim classifications via a composite heuristic score
-- **Photo uploads** for thesis screenshots or notes
+## Tech stack
 
-## Run locally
+- Next.js App Router (TypeScript)
+- API route (`/api/portfolio-data`) to enrich holdings with Yahoo Finance data
+- Recharts for visualizations
+- PapaParse for CSV parsing
+
+## Local development
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-streamlit run app.py
+npm install
+npm run dev
 ```
+
+Open http://localhost:3000.
 
 ## CSV format
 
-Required columns:
-
+Required headers:
 - `ticker`
 - `shares`
 - `cost_basis`
 
-Optional column:
+Optional header:
+- `target_weight` (decimal, e.g. `0.20`)
 
-- `target_weight` (decimal form, e.g., 0.20)
+## Deploy to Vercel
 
-You can download a sample CSV directly from the app sidebar.
+1. Push this repo to GitHub/GitLab/Bitbucket.
+2. Import the repo in Vercel.
+3. Framework preset: **Next.js** (auto-detected).
+4. Build command: `npm run build` (default)
+5. Output: `.next` (default)
+6. Deploy.
 
-## Notes
+No additional environment variables are required for the default Yahoo Finance integration.
 
-- Market/metadata source is Yahoo Finance (`yfinance`).
-- Suggestions are model heuristics for planning only and **not investment advice**.
+## Disclaimer
+
+The analytics and suggestions are heuristic and are **not investment advice**.
