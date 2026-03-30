@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Color Catcher</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        background: radial-gradient(circle at top, #1f2937, #020617 70%);
+      }
+
+      .card {
+        width: min(92vw, 620px);
+        background: rgba(15, 23, 42, 0.9);
+        border: 1px solid rgba(148, 163, 184, 0.3);
+        border-radius: 16px;
+        padding: 1.5rem;
+        box-shadow: 0 10px 35px rgba(2, 6, 23, 0.6);
+      }
+
+      h1 {
+        margin-top: 0;
+        margin-bottom: 0.5rem;
+      }
+
+      p {
+        margin-top: 0;
+        color: #cbd5e1;
+      }
+
+      .hud {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 0.8rem;
+        margin-bottom: 1rem;
+        font-weight: 700;
+      }
+
+      .arena {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 16/9;
+        border-radius: 12px;
+        background: linear-gradient(145deg, #0b1220, #111827);
+        overflow: hidden;
+        border: 1px solid rgba(148, 163, 184, 0.25);
+      }
+
+      .target {
+        position: absolute;
+        width: 70px;
+        height: 70px;
+        border-radius: 999px;
+        cursor: pointer;
+        border: 3px solid rgba(255, 255, 255, 0.5);
+        box-shadow: 0 0 18px rgba(255, 255, 255, 0.35);
+        transition: transform 0.1s ease;
+      }
+
+      .target:active {
+        transform: scale(0.92);
+      }
+
+      .controls {
+        display: flex;
+        justify-content: flex-end;
+        margin-top: 1rem;
+      }
+
+      button {
+        padding: 0.65rem 1rem;
+        border: 0;
+        border-radius: 10px;
+        background: #22d3ee;
+        color: #0f172a;
+        font-weight: 700;
+        cursor: pointer;
+      }
+
+      .overlay {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        background: rgba(2, 6, 23, 0.75);
+        text-align: center;
+        padding: 1rem;
+      }
+
+      .overlay.hidden {
+        display: none;
+      }
+
+      .overlay h2 {
+        margin: 0 0 0.3rem;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="card">
+      <h1>Color Catcher</h1>
+      <p>Click as many moving targets as you can in 20 seconds.</p>
+
+      <div class="hud">
+        <span>Score: <strong id="score">0</strong></span>
+        <span>Best: <strong id="best">0</strong></span>
+        <span>Time: <strong id="time">20</strong>s</span>
+      </div>
+
+      <section class="arena" id="arena" aria-label="Game arena">
+        <button class="target" id="target" aria-label="target"></button>
+        <div class="overlay" id="overlay">
+          <div>
+            <h2 id="message">Ready?</h2>
+            <p id="submessage">Press Start Game to begin.</p>
+            <button id="start">Start Game</button>
+          </div>
+        </div>
+      </section>
+
+      <div class="controls">
+        <button id="restart" style="display: none">Play Again</button>
+      </div>
+    </main>
+
+    <script>
+      const arena = document.getElementById('arena');
+      const target = document.getElementById('target');
+      const scoreEl = document.getElementById('score');
+      const bestEl = document.getElementById('best');
+      const timeEl = document.getElementById('time');
+      const overlay = document.getElementById('overlay');
+      const startBtn = document.getElementById('start');
+      const restartBtn = document.getElementById('restart');
+      const messageEl = document.getElementById('message');
+      const submessageEl = document.getElementById('submessage');
+
+      const GAME_DURATION = 20;
+      const TARGET_SIZE = 70;
+      let score = 0;
+      let timeLeft = GAME_DURATION;
+      let timerId;
+      let gameOn = false;
+      let best = Number(localStorage.getItem('color-catcher-best') || 0);
+
+      bestEl.textContent = best;
+
+      function randomPosition() {
+        const maxX = arena.clientWidth - TARGET_SIZE;
+        const maxY = arena.clientHeight - TARGET_SIZE;
+        const x = Math.floor(Math.random() * maxX);
+        const y = Math.floor(Math.random() * maxY);
+        target.style.left = `${x}px`;
+        target.style.top = `${y}px`;
+        target.style.background = `hsl(${Math.floor(Math.random() * 360)} 90% 55%)`;
+      }
+
+      function setOverlay(title, subtitle, hidden = false) {
+        messageEl.textContent = title;
+        submessageEl.textContent = subtitle;
+        overlay.classList.toggle('hidden', hidden);
+      }
+
+      function endGame() {
+        gameOn = false;
+        clearInterval(timerId);
+        target.style.display = 'none';
+        if (score > best) {
+          best = score;
+          localStorage.setItem('color-catcher-best', String(best));
+          bestEl.textContent = best;
+        }
+        setOverlay('Time up!', `You scored ${score}. ${score >= best ? 'New best!' : 'Try again!'}`);
+        startBtn.style.display = 'none';
+        restartBtn.style.display = 'inline-flex';
+      }
+
+      function startGame() {
+        score = 0;
+        timeLeft = GAME_DURATION;
+        gameOn = true;
+        scoreEl.textContent = score;
+        timeEl.textContent = timeLeft;
+        target.style.display = 'block';
+        restartBtn.style.display = 'none';
+        startBtn.style.display = 'inline-flex';
+        setOverlay('Go!', 'Catch every target you can.', true);
+        randomPosition();
+
+        timerId = setInterval(() => {
+          timeLeft -= 1;
+          timeEl.textContent = timeLeft;
+          if (timeLeft <= 0) {
+            endGame();
+          }
+        }, 1000);
+      }
+
+      target.addEventListener('click', () => {
+        if (!gameOn) return;
+        score += 1;
+        scoreEl.textContent = score;
+        randomPosition();
+      });
+
+      startBtn.addEventListener('click', startGame);
+      restartBtn.addEventListener('click', startGame);
+
+      window.addEventListener('resize', () => {
+        if (gameOn) randomPosition();
+      });
+
+      target.style.display = 'none';
+    </script>
+  </body>
+</html>
