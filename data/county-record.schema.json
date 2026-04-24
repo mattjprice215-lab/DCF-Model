@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "FL-GA County Student Pipeline Record",
+  "type": "object",
+  "required": [
+    "fips","county","state","region","metroStatus","sizeBucket","year","provisional","totalPopulation",
+    "totalBirths","crudeBirthRate","birthsChange1y","birthsChange5y","birthsChange10y","under5Population",
+    "schoolAgePopulation","netDomesticMigration","populationGrowthRate","enrollmentTotal","enrollmentChange5y"
+  ],
+  "properties": {
+    "fips": { "type": "string", "pattern": "^(12|13)\\d{3}$" },
+    "county": { "type": "string" },
+    "state": { "type": "string", "enum": ["FL", "GA"] },
+    "region": { "type": "string" },
+    "metroStatus": { "type": "string", "enum": ["Metro", "Non-metro"] },
+    "sizeBucket": { "type": "string", "enum": ["Small", "Medium", "Large"] },
+    "year": { "type": "integer" },
+    "provisional": { "type": "boolean" },
+    "totalPopulation": { "type": "integer" },
+    "totalBirths": { "type": "integer" },
+    "crudeBirthRate": { "type": "number" },
+    "fertilityRate": { "type": ["number", "null"] },
+    "birthsChange1y": { "type": "number" },
+    "birthsChange5y": { "type": "number" },
+    "birthsChange10y": { "type": "number" },
+    "under5Population": { "type": "integer" },
+    "schoolAgePopulation": { "type": "integer" },
+    "netDomesticMigration": { "type": "integer" },
+    "populationGrowthRate": { "type": "number" },
+    "enrollmentTotal": { "type": "integer" },
+    "enrollmentChange5y": { "type": "number" },
+    "kindergartenEnrollment": { "type": ["integer", "null"] },
+    "kindergartenChange5y": { "type": ["number", "null"] }
+  }
+}
